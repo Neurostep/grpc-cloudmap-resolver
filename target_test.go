@@ -1,6 +1,7 @@
 package cloudmap
 
 import (
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -58,6 +59,7 @@ func Test_parseTarget(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
+		url     string
 		want    *target
 		wantErr bool
 	}{
@@ -95,9 +97,9 @@ func Test_parseTarget(t *testing.T) {
 				t: grpcresolver.Target{
 					Scheme:    Scheme,
 					Authority: "test-namespace",
-					Endpoint:  "test-service",
 				},
 			},
+			url: "cloudmap://test-namespace/test-service",
 			want: &target{
 				namespace: "test-namespace",
 				service:   "test-service",
@@ -109,9 +111,9 @@ func Test_parseTarget(t *testing.T) {
 				t: grpcresolver.Target{
 					Scheme:    Scheme,
 					Authority: "test-namespace",
-					Endpoint:  "test/service",
 				},
 			},
+			url: "cloudmap://test-namespace/test%2Fservice",
 			want: &target{
 				namespace: "test-namespace",
 				service:   "test/service",
@@ -123,9 +125,9 @@ func Test_parseTarget(t *testing.T) {
 				t: grpcresolver.Target{
 					Scheme:    Scheme,
 					Authority: "test-namespace",
-					Endpoint:  "test%20service",
 				},
 			},
+			url: "cloudmap://test-namespace/test%20service",
 			want: &target{
 				namespace: "test-namespace",
 				service:   "test service",
@@ -134,6 +136,12 @@ func Test_parseTarget(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			u, err := url.Parse(tt.url)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			tt.args.t.URL = *u
 			got, err := parseTarget(tt.args.t)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseTarget() error = %v, wantErr %v", err, tt.wantErr)
