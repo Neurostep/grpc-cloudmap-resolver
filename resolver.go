@@ -39,6 +39,8 @@ func (c *resolver) ResolveNow(grpcresolver.ResolveNowOptions) {
 		return
 	}
 
+	c.logger.Infof("ResolveNow: %s.%s\n", c.namespace, c.service)
+
 	output, err := c.sd.DiscoverInstances(&servicediscovery.DiscoverInstancesInput{
 		NamespaceName: aws.String(c.namespace),
 		ServiceName:   aws.String(c.service),
