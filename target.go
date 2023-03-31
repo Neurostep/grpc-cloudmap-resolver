@@ -33,7 +33,7 @@ func parseTarget(t grpcresolver.Target) (*target, error) {
 		return nil, errors.New("namespace is required")
 	}
 
-	service, err := url.PathUnescape(t.Endpoint)
+	service, err := url.PathUnescape(t.Endpoint())
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse service: %v", err)
 	}
